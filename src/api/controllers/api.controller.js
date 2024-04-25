@@ -29,20 +29,22 @@ async function awsRoutes(fastify, options) {
     },
     handler: async (request, reply) => {
       try {
-        console.log(request.body)
+        console.log(request.body);
         const { text } = request.body;
         if (!text || typeof text !== "string") {
-          const error =await errorModel(
+          const error = await errorModel(
             400,
             "text is required and must be a string"
           );
-          throw error
+          throw error;
         }
         const voice = await createAudio(text);
+        // reply.header("Content-disposition", "attachment; filename=audio.mp3");
+        reply.type(voice.content);
         reply
           .code(200)
-          .header("Content-Type", voice.headers["content-type"])
           .send(Buffer.from(voice.stream.buffer));
+
       } catch (e) {
         reply.code(e.status || 500).send({ error: e.message });
       }
